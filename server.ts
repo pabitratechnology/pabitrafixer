@@ -3,37 +3,48 @@ dotenv.config();
 
 import express from "express";
 import cors from "cors";
+import mongoose from "mongoose"; // Import mongoose directly
 import path from "path";
 import { fileURLToPath } from "url";
 
-// ✅ ADD .ts EXTENSIONS TO THESE IMPORTS
-import { connectDB } from "./server/config/db.ts"; 
-import apiRoutes from "./server/routes/api.ts";
-import { errorHandler } from "./server/middleware/index.ts";
+// --- REMOVED THE FAILING DATABASE IMPORT ---
+// import { connectDB } from "./server/config/db"; 
+
+// --- KEEPING THESE BUT ADDING .JS (Node requires .js even for .ts files in ESM) ---
+import apiRoutes from "./server/routes/api.js"; 
+import { errorHandler } from "./server/middleware/index.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const MONGODB_URI = (process.env.MONGODB_URI || "").trim();
-
+const MONGODB_URI = process.env.MONGODB_URI || "";
 const app = express();
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// 1. Connect to Database (Simplified for Vercel)
-if (MONGODB_URI) {
-  connectDB(MONGODB_URI).catch(err => console.error("DB Connection Error:", err));
-}
+// 1. DATABASE CONNECTION (Embedded here to avoid errors)
+const connectToMongo = async () => {
+  try {
+    if (!MONGODB_URI) {
+      console.error("❌ MONGODB_URI is missing!");
+      return;
+    }
+    await mongoose.connect(MONGODB_URI.trim());
+    console.log("✅ MongoDB Connected Successfully");
+  } catch (err) {
+    console.error("❌ MongoDB Connection Error:", err);
+  }
+};
+connectToMongo();
 
-// 2. API Routes
+// 2. API ROUTES
 app.use("/api", apiRoutes);
 
-// 3. Error Handling
+// 3. ERROR HANDLING
 app.use(errorHandler);
 
-// 4. Handle Static Files (Only for local dev; Vercel uses vercel.json for this)
+// 4. PRODUCTION STATIC FILES
 if (process.env.NODE_ENV === "production") {
   const distPath = path.join(__dirname, "dist");
   app.use(express.static(distPath));
@@ -42,13 +53,10 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
-// 5. IMPORTANT: Conditional Listen & Export
-// On Vercel, app.listen is NOT used. We just export the app.
+// 5. EXPORT FOR VERCEL
 if (process.env.NODE_ENV !== "production") {
   const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => {
-    console.log(`🚀 Local Server: http://localhost:${PORT}`);
-  });
+  app.listen(PORT, () => console.log(`🚀 Running on http://localhost:${PORT}`));
 }
 
-export default app; // 👈 REQUIRED for Vercel
+export default app;
