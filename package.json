@@ -5,10 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
-    "start": "node server.ts",
     "build": "vite build",
-    "preview": "vite preview",
-    "clean": "rm -rf dist",
+    "start": "node server.js", 
     "lint": "tsc --noEmit"
   },
   "dependencies": {

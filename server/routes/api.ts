@@ -1,10 +1,10 @@
 import express from "express";
-import * as authController from "../controllers/authController";
-import * as jobController from "../controllers/jobController";
-import * as notificationController from "../controllers/notificationController";
-import * as contentController from "../controllers/contentController";
-import * as miscController from "../controllers/miscController";
-import { authenticate, isAdmin, isAuthorizedToPost } from "../middleware/index";
+import * as authController from "../controllers/authController.js";
+import * as jobController from "../controllers/jobController.js";
+import * as notificationController from "../controllers/notificationController.js";
+import * as contentController from "../controllers/contentController.js";
+import * as miscController from "../controllers/miscController.js";
+import { authenticate, isAdmin, isAuthorizedToPost } from "../middleware/index.js";
 import mongoose from "mongoose";
 
 const router = express.Router();

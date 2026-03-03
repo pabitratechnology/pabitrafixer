@@ -1,4 +1,4 @@
-import { AdmitCard, Result, AnswerKey } from "../models/index";
+import { AdmitCard, Result, AnswerKey } from "../models/index.js";
 
 /**
  * ==========================================

@@ -1,4 +1,4 @@
-import { Syllabus, PreviousPaper, StudyMaterial, Category } from "../models/index";
+import { Syllabus, PreviousPaper, StudyMaterial, Category } from "../models/index.js";
 
 // ==========================================
 // 1. SYLLABUS MANAGEMENT

@@ -1,4 +1,4 @@
-import { Category, AdmitCard, Result, Subscriber } from "../models/index";
+import { Category, AdmitCard, Result, Subscriber } from "../models/index.js";
 
 export const getCategories = async (req: any, res: any) => {
   try {

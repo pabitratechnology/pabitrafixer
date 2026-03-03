@@ -1,4 +1,4 @@
-import { Job, Category, User } from "../models/index";
+import { Job, Category, User } from "../models/index.js";
 
 /**
  * GET JOBS: Professional filtering, searching, and pagination
