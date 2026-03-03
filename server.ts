@@ -2,77 +2,53 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import express from "express";
-import cors from "cors"; // Added CORS
-import { createServer as createViteServer } from "vite";
+import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
-import { connectDB } from "./server/config/db";
-import apiRoutes from "./server/routes/api";
-import { errorHandler } from "./server/middleware/index";
+
+// ✅ ADD .ts EXTENSIONS TO THESE IMPORTS
+import { connectDB } from "./server/config/db.ts"; 
+import apiRoutes from "./server/routes/api.ts";
+import { errorHandler } from "./server/middleware/index.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Clean up URI and set Port
-const MONGODB_URI = (process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/jobs").trim();
-const PORT = process.env.PORT || 3000;
+const MONGODB_URI = (process.env.MONGODB_URI || "").trim();
 
-// Initialize Express
 const app = express();
 
-/**
- * GLOBAL MIDDLEWARE
- */
-app.use(cors()); // Allows your Frontend (Port 5173) to talk to this Backend (Port 3000)
-app.use(express.json()); // Allows the server to read JSON in request bodies
+// Middleware
+app.use(cors());
+app.use(express.json());
 
-async function startServer() {
-  // 1. Connect to Database
-  await connectDB(MONGODB_URI);
+// 1. Connect to Database (Simplified for Vercel)
+if (MONGODB_URI) {
+  connectDB(MONGODB_URI).catch(err => console.error("DB Connection Error:", err));
+}
 
-  /**
-   * 2. API ROUTES
-   * These MUST come before the Vite/Static middleware
-   */
-  app.use("/api", apiRoutes);
+// 2. API Routes
+app.use("/api", apiRoutes);
 
-  /**
-   * 3. VITE / STATIC FILE HANDLING
-   * This handles the Frontend part of your application
-   */
-  if (process.env.NODE_ENV !== "production") {
-    // Development Mode: Use Vite Middleware
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: "spa",
-    });
-    app.use(vite.middlewares);
-  } else {
-    // Production Mode: Serve built files from 'dist' folder
-    const distPath = path.join(__dirname, "dist");
-    app.use(express.static(distPath));
-    
-    // Redirect all other requests to index.html (SPA support)
-    app.get("*", (req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
-    });
-  }
+// 3. Error Handling
+app.use(errorHandler);
 
-  /**
-   * 4. ERROR HANDLING
-   * Catch-all for any errors thrown in routes
-   */
-  app.use(errorHandler);
-
-  // 5. Start Listening
-  app.listen(PORT, () => {
-    console.log(`-----------------------------------------------`);
-    console.log(`🚀 Server running at http://localhost:${PORT}`);
-    console.log(`📁 API Base Path: http://localhost:${PORT}/api`);
-    console.log(`-----------------------------------------------`);
+// 4. Handle Static Files (Only for local dev; Vercel uses vercel.json for this)
+if (process.env.NODE_ENV === "production") {
+  const distPath = path.join(__dirname, "dist");
+  app.use(express.static(distPath));
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(distPath, "index.html"));
   });
 }
 
-startServer().catch(err => {
-  console.error("FATAL: Failed to start server:", err);
-});
+// 5. IMPORTANT: Conditional Listen & Export
+// On Vercel, app.listen is NOT used. We just export the app.
+if (process.env.NODE_ENV !== "production") {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`🚀 Local Server: http://localhost:${PORT}`);
+  });
+}
+
+export default app; // 👈 REQUIRED for Vercel
