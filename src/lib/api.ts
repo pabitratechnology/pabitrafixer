@@ -1,8 +1,9 @@
 import axios from "axios";
 
 const api = axios.create({
-  // Change this to the full URL of your backend
-  baseURL: "http://localhost:3000/api", 
+  // This will use the VITE_API_URL from your .env file, 
+  // or default to "/api" if it's not found.
+  baseURL: import.meta.env.VITE_API_URL || "/api", 
 });
 
 api.interceptors.request.use((config) => {
