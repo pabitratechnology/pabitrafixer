@@ -1,9 +1,8 @@
 import axios from "axios";
 
 const api = axios.create({
-  // This will use the VITE_API_URL from your .env file, 
-  // or default to "/api" if it's not found.
-  baseURL: import.meta.env.VITE_API_URL || "/api", 
+  // Use a relative path so it works on any domain (Local or Vercel)
+  baseURL: "/api", 
 });
 
 api.interceptors.request.use((config) => {
